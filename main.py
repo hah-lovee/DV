@@ -5,7 +5,8 @@ import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 from pydub import AudioSegment
 
-bot = telebot.TeleBot('6644384647:AAHAqwZc0PCO7m7vhXO_eON_ZLtvNk4WHCo')
+token=next(open('conf.txt')).strip()
+bot = telebot.TeleBot(token)
 
 lang=''
 
@@ -31,14 +32,14 @@ def Recognition(s) -> str:
     except sr.RequestError as e:
         print("Error; {0}".format(e))
     return text
-def ol(S):
+def ol(S) -> str:
     if S=='Русский':
         return 'ru'
     if S=='English':
         return 'en'
 
 @bot.message_handler(commands=['start'])
-def choose_language(message):
+def choose_language(message) -> None:
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(KeyboardButton('English'))
     markup.add(KeyboardButton('Русский'))
@@ -46,18 +47,18 @@ def choose_language(message):
 
 
 @bot.message_handler(func=lambda message: message.text in ['English', 'Русский'])
-def handle_language_choice(message):
+def handle_language_choice(message) -> None:
     global lang
     lang=ol(message.text)
     bot.send_message(message.chat.id, f"Вы выбрали язык: {message.text}. Отправьте голосовое сообщение или аудиофайл.")
 
 
 @bot.message_handler(content_types=['voice', 'audio'])
-def handle_audio(message):
+def handle_audio(message) -> None:
     global lang
     save_and_send_audio(message)
 
-def save_and_send_audio(message):
+def save_and_send_audio(message) -> None:
     global lang
     file_id = message.voice.file_id if message.voice else message.audio.file_id
     file_info = bot.get_file(file_id)
@@ -80,4 +81,3 @@ def save_and_send_audio(message):
     os.remove(wav_file_name)
     os.remove("Audio/YourAnswer.mp3")
 bot.polling(none_stop=True)
-
