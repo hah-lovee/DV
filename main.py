@@ -67,20 +67,34 @@ def save_and_send_audio(message) -> None:
     file_id = message.voice.file_id if message.voice else message.audio.file_id
     file_info = bot.get_file(file_id)
     downloaded_file = bot.download_file(file_info.file_path)
+    try:
+        ogg_file_name = f'temp/{lang}_audio.ogg'
+        with open(ogg_file_name, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        wav_file_name = f'temp/{lang}_test.wav'
+    
+        audio = AudioSegment.from_ogg(ogg_file_name)
+        audio.export(wav_file_name, format="wav")
+    
+        print("Wav ready")
+        gotten_text=Recognition(wav_file_name)
+    
+        print("Текст распознан: " + gotten_text)
+        tts = gTTS(gotten_text, lang=lang)
+        tts.save('temp/YourAnswer.mp3')
+        sendet_audio= open ("temp/YourAnswer.mp3", 'rb')
+        bot.send_audio(message.chat.id, sendet_audio)
+        sendet_audio.close()
+    finally:
+        cleanup_temp_files()
 
-    ogg_file_name = f'{lang}_audio.ogg'
-    with open(ogg_file_name, 'wb') as new_file:
-        new_file.write(downloaded_file)
-    wav_file_name = f'{lang}_test.wav'
-    audio = AudioSegment.from_ogg(ogg_file_name)
-    audio.export(wav_file_name, format="wav")
-    print("Wav ready")
-    gotten_text=Recognition(wav_file_name)
-    print("Текст распознан: " + gotten_text)
-    tts = gTTS(gotten_text, lang=lang)
-    tts.save('Audio/YourAnswer.mp3')
-    sendet_audio= open ("Audio/YourAnswer.mp3", 'rb')
-    bot.send_audio(message.chat.id, sendet_audio)
-    os.remove(ogg_file_name)
-    os.remove(wav_file_name)
+def cleanup_temp_files():
+    for filename in os.listdir('temp'):
+        file_path = os.path.join('temp', filename)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+        except Exception as e:
+            print(f"Ошибка при удалении файла {file_path}: {e}")
+    
 bot.polling(none_stop=True)
