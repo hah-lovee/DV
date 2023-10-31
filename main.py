@@ -32,10 +32,11 @@ def Recognition(s) -> str:
         text = r.recognize_google(audio, language=lang)
         write_file(text)
     except sr.UnknownValueError:
-        text = "я не понял"
+        text = "донт андерстент"
         print("Don't ubderstand audio")
     except sr.RequestError as e:
         print("Error; {0}".format(e))
+
     return text
 
 def ol(S) -> str:
