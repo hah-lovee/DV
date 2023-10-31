@@ -15,7 +15,7 @@ lang = ''
 
 
 def write_file(voice_to_text: str) -> None:
-    with open('voice_to_text.txt', 'w', encoding='utf-8') as file:
+    with open('temp/voice_to_text.txt', 'w', encoding='utf-8') as file:
         file.writelines(voice_to_text)
 
 def lplus(l) -> str:
@@ -29,13 +29,15 @@ def Recognition(s) -> str:
     with sr.AudioFile(s) as sourse:
         audio = r.record(sourse)
     try:
-         text = r.recognize_google(audio, language=lang)
-         write_file(text)
+        text = r.recognize_google(audio, language=lang)
+        write_file(text)
     except sr.UnknownValueError:
-         print("Don't ubderstand audio")
+        text = "я не понял"
+        print("Don't ubderstand audio")
     except sr.RequestError as e:
         print("Error; {0}".format(e))
     return text
+
 def ol(S) -> str:
     if S =='Русский':
         return 'ru'
@@ -60,7 +62,11 @@ def handle_language_choice(message) -> None:
 @bot.message_handler(content_types=['voice', 'audio'])
 def handle_audio(message) -> None:
     global lang
-    save_and_send_audio(message)
+    if lang == "":
+        bot.send_message(message.chat.id, "Пожалуйста, сначала выберите язык.")
+    else:
+        print(f"я тут lang -> {lang}")
+        save_and_send_audio(message)
 
 def save_and_send_audio(message) -> None:
     global lang
@@ -72,6 +78,7 @@ def save_and_send_audio(message) -> None:
         with open(ogg_file_name, 'wb') as new_file:
             new_file.write(downloaded_file)
         wav_file_name = f'temp/{lang}_test.wav'
+        # wav_file_name = f'{lang}_test.wav'
     
         audio = AudioSegment.from_ogg(ogg_file_name)
         audio.export(wav_file_name, format="wav")
