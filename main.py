@@ -4,11 +4,14 @@ import speech_recognition as sr
 import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 from pydub import AudioSegment
+from dotenv import load_dotenv
 
-token=next(open('conf.txt')).strip()
-bot = telebot.TeleBot(token)
+load_dotenv()
 
-lang=''
+
+bot = telebot.TeleBot(os.getenv("token"))
+
+lang = ''
 
 
 def write_file(voice_to_text: str) -> None:
@@ -16,8 +19,9 @@ def write_file(voice_to_text: str) -> None:
         file.writelines(voice_to_text)
 
 def lplus(l) -> str:
-    s=l+"-"+l.upper()
+    s = l+"-"+l.upper()
     return s
+
 def Recognition(s) -> str:
     global text
     global lang
@@ -25,7 +29,7 @@ def Recognition(s) -> str:
     with sr.AudioFile(s) as sourse:
         audio = r.record(sourse)
     try:
-         text = r.recognize_google(audio,language=lang)
+         text = r.recognize_google(audio, language=lang)
          write_file(text)
     except sr.UnknownValueError:
          print("Don't ubderstand audio")
@@ -33,9 +37,9 @@ def Recognition(s) -> str:
         print("Error; {0}".format(e))
     return text
 def ol(S) -> str:
-    if S=='Русский':
+    if S =='Русский':
         return 'ru'
-    if S=='English':
+    if S =='English':
         return 'en'
 
 @bot.message_handler(commands=['start'])
@@ -49,7 +53,7 @@ def choose_language(message) -> None:
 @bot.message_handler(func=lambda message: message.text in ['English', 'Русский'])
 def handle_language_choice(message) -> None:
     global lang
-    lang=ol(message.text)
+    lang = ol(message.text)
     bot.send_message(message.chat.id, f"Вы выбрали язык: {message.text}. Отправьте голосовое сообщение или аудиофайл.")
 
 
