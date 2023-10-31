@@ -79,5 +79,4 @@ def save_and_send_audio(message) -> None:
     bot.send_audio(message.chat.id, sendet_audio)
     os.remove(ogg_file_name)
     os.remove(wav_file_name)
-    os.remove("Audio/YourAnswer.mp3")
 bot.polling(none_stop=True)
